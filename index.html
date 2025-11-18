@@ -2,40 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat-App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* LOADER - KEPT EXACTLY THE SAME */
         .earth-loader {
-          --watercolor: #3344c1;
-          --landcolor: #7cc133;
-          width: 7.5em;
-          height: 7.5em;
-          background-color: var(--watercolor);
-          position: relative;
-          overflow: hidden;
-          border-radius: 50%;
-          box-shadow: inset 0em 0.5em rgba(255, 255, 255, 0.25), inset 0em -0.5em rgba(0, 0, 0, 0.25);
-          border: solid 0.15em white;
-          animation: startround 1s;
+            --watercolor: #3344c1;
+            --landcolor: #7cc133;
+            width: 7.5em;
+            height: 7.5em;
+            background-color: var(--watercolor);
+            position: relative;
+            overflow: hidden;
+            border-radius: 50%;
+            box-shadow: inset 0em 0.5em rgba(255, 255, 255, 0.25), inset 0em -0.5em rgba(0, 0, 0, 0.25);
+            border: solid 0.15em white;
+            animation: startround 1s;
         }
 
         .earth p {
-          color: white;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding-top: 0.25em;
-          font-size: 1.25em;
-          font-family: "Gill Sans", sans-serif;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 0.25em;
+            font-size: 1.25em;
+            font-family: "Gill Sans", sans-serif;
         }
 
         .earth-loader svg {
-          position: absolute;
-          width: 7em;
-          height: auto;
+            position: absolute;
+            width: 7em;
+            height: auto;
         }
 
         .earth-loader svg:nth-child(1) { bottom: -2em; animation: round1 5s infinite linear 0.75s; }
@@ -44,35 +59,376 @@
         .earth-loader svg:nth-child(4) { bottom: -2.2em; animation: round2 5s infinite linear 0.75s; }
 
         @keyframes startround {
-          0%, 75% { filter: brightness(500%); box-shadow: none; }
-          100% { filter: brightness(100%); box-shadow: inset 0em 0.5em rgba(255, 255, 255, 0.25), inset 0em -0.5em rgba(0, 0, 0, 0.25); }
+            0%, 75% { filter: brightness(500%); box-shadow: none; }
+            100% { filter: brightness(100%); box-shadow: inset 0em 0.5em rgba(255, 255, 255, 0.25), inset 0em -0.5em rgba(0, 0, 0, 0.25); }
         }
 
         @keyframes round1 {
-          0% { left: -2em; opacity: 1; transform: skewX(0deg) rotate(0deg); }
-          30% { left: -6em; transform: skewX(-25deg) rotate(25deg); }
-          31%, 35% { opacity: 0; }
-          45% { left: 7em; opacity: 1; transform: skewX(25deg) rotate(-25deg); }
-          100% { left: -2em; transform: skewX(0deg) rotate(0deg); }
+            0% { left: -2em; opacity: 1; transform: skewX(0deg) rotate(0deg); }
+            30% { left: -6em; transform: skewX(-25deg) rotate(25deg); }
+            31%, 35% { opacity: 0; }
+            45% { left: 7em; opacity: 1; transform: skewX(25deg) rotate(-25deg); }
+            100% { left: -2em; transform: skewX(0deg) rotate(0deg); }
         }
 
         @keyframes round2 {
-          0% { left: 5em; }
-          75% { left: -7em; transform: skewX(-25deg) rotate(25deg); }
-          76%, 77% { opacity: 0; }
-          80% { left: 8em; opacity: 1; transform: skewX(25deg) rotate(-25deg); }
-          100% { left: 5em; }
+            0% { left: 5em; }
+            75% { left: -7em; transform: skewX(-25deg) rotate(25deg); }
+            76%, 77% { opacity: 0; }
+            80% { left: 8em; opacity: 1; transform: skewX(25deg) rotate(-25deg); }
+            100% { left: 5em; }
         }
 
-        #chatContainer { display: none; }
-
         .earth {
-          height: 100vh;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          background: #000;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
+
+        /* MODERN CHAT STYLES */
+        #chatContainer {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .chat-header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #ff006e 0%, #8338ec 50%, #ccff00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        #chat {
+            background: rgba(20, 20, 20, 0.8);
+            border: 2px solid rgba(255, 0, 110, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            height: 450px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            box-shadow: 
+                0 0 30px rgba(255, 0, 110, 0.2),
+                0 0 60px rgba(204, 255, 0, 0.1),
+                inset 0 0 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        #chat::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        #chat::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ff006e, #ccff00);
+            border-radius: 10px;
+        }
+
+        .message-bubble {
+            background: linear-gradient(135deg, rgba(255, 0, 110, 0.2), rgba(131, 56, 236, 0.2));
+            border-left: 4px solid #ff006e;
+            padding: 12px 18px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-sender {
+            color: #ccff00;
+            font-weight: bold;
+            margin-right: 8px;
+            text-shadow: 0 0 10px rgba(204, 255, 0, 0.5);
+        }
+
+        .input-section {
+            background: rgba(20, 20, 20, 0.8);
+            padding: 25px;
+            border-radius: 20px;
+            border: 2px solid rgba(204, 255, 0, 0.3);
+            box-shadow: 
+                0 0 30px rgba(204, 255, 0, 0.2),
+                0 0 60px rgba(255, 0, 110, 0.1);
+        }
+
+        .modern-input {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 0, 110, 0.4);
+            border-radius: 12px;
+            padding: 15px 20px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .modern-input:focus {
+            outline: none;
+            border-color: #ff006e;
+            box-shadow: 0 0 20px rgba(255, 0, 110, 0.4);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .modern-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .message-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-group input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #ff006e, #8338ec);
+            border: none;
+            border-radius: 12px;
+            padding: 15px 35px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(255, 0, 110, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(255, 0, 110, 0.6);
+            background: linear-gradient(135deg, #ff006e, #ccff00);
+        }
+
+        .send-btn:active {
+            transform: translateY(0);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #ccff00;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: pulse 1.5s ease-in-out infinite;
+            box-shadow: 0 0 10px #ccff00;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* Responsive Design */
+        /* Mobile Devices (Portrait) */
+        @media (max-width: 576px) {
+            #chatContainer {
+                padding: 10px;
+            }
+
+            .chat-header {
+                font-size: 1.5rem;
+                padding: 20px 0;
+                margin-bottom: 20px;
+                letter-spacing: 1px;
+            }
+
+            #chat {
+                height: 300px;
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .message-bubble {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+            }
+
+            .input-section {
+                padding: 15px;
+            }
+
+            .modern-input {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+                margin-bottom: 12px;
+            }
+
+            .message-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .message-group input {
+                width: 100%;
+            }
+
+            .send-btn {
+                width: 100%;
+                padding: 14px 25px;
+                font-size: 1rem;
+            }
+
+            .status-indicator {
+                width: 10px;
+                height: 10px;
+            }
+        }
+
+        /* Tablets (Portrait) */
+        @media (min-width: 577px) and (max-width: 768px) {
+            #chatContainer {
+                padding: 15px;
+            }
+
+            .chat-header {
+                font-size: 2rem;
+                padding: 25px 0;
+            }
+
+            #chat {
+                height: 380px;
+                padding: 20px;
+            }
+
+            .input-section {
+                padding: 20px;
+            }
+
+            .modern-input {
+                padding: 14px 18px;
+            }
+
+            .send-btn {
+                padding: 14px 30px;
+                font-size: 1rem;
+            }
+        }
+
+        /* Tablets (Landscape) and Small Laptops */
+        @media (min-width: 769px) and (max-width: 992px) {
+            #chatContainer {
+                max-width: 750px;
+                padding: 20px;
+            }
+
+            .chat-header {
+                font-size: 2.3rem;
+            }
+
+            #chat {
+                height: 420px;
+            }
+        }
+
+        /* Desktop and Laptops */
+        @media (min-width: 993px) and (max-width: 1200px) {
+            #chatContainer {
+                max-width: 850px;
+            }
+
+            #chat {
+                height: 480px;
+            }
+        }
+
+        /* Large Desktop */
+        @media (min-width: 1201px) {
+            #chatContainer {
+                max-width: 1000px;
+            }
+
+            .chat-header {
+                font-size: 3rem;
+                padding: 40px 0;
+            }
+
+            #chat {
+                height: 550px;
+                padding: 30px;
+            }
+
+            .message-bubble {
+                padding: 14px 20px;
+                font-size: 1.05rem;
+            }
+
+            .input-section {
+                padding: 30px;
+            }
+
+            .modern-input {
+                padding: 16px 22px;
+                font-size: 1.05rem;
+            }
+
+            .send-btn {
+                padding: 16px 40px;
+                font-size: 1.15rem;
+            }
+        }
+
+        /* Landscape Mode for Mobile */
+        @media (max-height: 600px) and (orientation: landscape) {
+            #chat {
+                height: 250px;
+            }
+
+            .chat-header {
+                font-size: 1.5rem;
+                padding: 15px 0;
+                margin-bottom: 15px;
+            }
+
+            .input-section {
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -88,24 +444,24 @@
     <p>Connecting...</p>
 </div>
 
-<div class="container mt-4" id="chatContainer">
-    <h1 class="text-center">Real Time Chat App</h1>
-    <div id="chat" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;"></div>
+<div id="chatContainer">
+    <h1 class="chat-header">
+        Real Time Chat <span class="status-indicator"></span>
+    </h1>
+    
+    <div id="chat"></div>
 
-    <div class="input-group mb-3">
-        <input id="senderInput" type="text" class="form-control" placeholder="Your Name....." />
-    </div>
-
-    <div class="input-group mb-3">
-        <input id="messageInput" type="text" class="form-control" placeholder="Type your message..🪄" />
-        <div>
-            <button id="sendMessage" type="button" class="btn btn-outline-success">Send ➤</button>
+    <div class="input-section">
+        <input id="senderInput" type="text" class="modern-input" placeholder="Enter your name..." />
+        
+        <div class="message-group">
+            <input id="messageInput" type="text" class="modern-input" placeholder="Type your message... 💬" />
+            <button id="sendMessage" type="button" class="send-btn">Send ➤</button>
         </div>
     </div>
 </div>
 
 <script>
-    // IMPORTANT: BACKEND URL
     const BACKEND_URL = "https://chat-socket-0601.onrender.com";
 
     function setConnected(connected){
@@ -113,14 +469,11 @@
     }
 
     function connect(){
-        // FULL URL FOR SOCKJS
         var socket = new SockJS(BACKEND_URL + "/chats");
-
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function(frame){
             setConnected(true);
-
             document.getElementById('loader').style.display = 'none';
             document.getElementById('chatContainer').style.display = 'block';
 
@@ -133,11 +486,18 @@
     function showMessage(message){
         var chat = document.getElementById('chat');
         var messageElement = document.createElement('div');
-
-        messageElement.textContent = message.sender + ' : ' + message.content;
-        messageElement.class = "border-bottom mb-1";
-
-        chat.appendChild(messageElement)
+        messageElement.className = "message-bubble";
+        
+        var senderSpan = document.createElement('span');
+        senderSpan.className = "message-sender";
+        senderSpan.textContent = message.sender;
+        
+        var contentText = document.createTextNode(': ' + message.content);
+        
+        messageElement.appendChild(senderSpan);
+        messageElement.appendChild(contentText);
+        
+        chat.appendChild(messageElement);
         chat.scrollTop = chat.scrollHeight;
     }
 
@@ -145,16 +505,24 @@
         var sender = document.getElementById('senderInput').value;
         var content = document.getElementById('messageInput').value;
 
-        var chatMessage={
+        if (!sender || !content) return;
+
+        var chatMessage = {
             sender: sender,
             content: content
-        }
+        };
 
-        stompClient.send("/app/sendMessage",{}, JSON.stringify(chatMessage));
+        stompClient.send("/app/sendMessage", {}, JSON.stringify(chatMessage));
         document.getElementById('messageInput').value = '';
     }
 
     document.getElementById('sendMessage').onclick = sendMessage;
+    
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
 
     window.onload = function () {
         setTimeout(() => {
